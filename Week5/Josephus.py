@@ -14,34 +14,39 @@ class DoublyLinkedList:
     def __len__(self):
         return self.size
 
-    def insertAfter(self, a, key):
+    def splice(self, a, b, x):  # cut [a..b] after x
+        if a == None or b == None or x == None:
+            return
+        # 1. [a..b] 구간을 잘라내기
+        a.prev.next = b.next
+        b.next.prev = a.prev
+
+        # 2. [a..b]를 x 다음에 삽입하기
+        x.next.prev = b
+        b.next = x.next
+        a.prev = x
+        x.next = a
+
+    def moveBefore(self, a, x):
+        self.splice(a, a, x.prev)
+
+    def insertBefore(self, a, key):
         new_node = Node(key)
-        current = self.head
-        while current.key != a:
-            temp = current
-            current = current.next
-            current.prev = temp
-        new_node.next = current.next
-        new_node.prev = current
-        self.head.next = new_node
-        self.head.next.prev = new_node
-        self.size += 1
+        self.moveBefore(new_node, a)
 
     def pushBack(self, key):
-        tail = self.head
-        for i in range(len(self)):
-            tail = tail.next
-        self.insertAfter(tail.key, key)
+        self.insertBefore(self.head, key)
+        self.size += 1
 
-    def deleteNode(self, x):
-        print('deletenode')
-        print(x.prev.key, x.key, x.next.key)
-        x.prev.next = x.next
-        x.next.prev = x.prev
+    def deleteNode(self, x):  # delete x
+        if x == None or x == self.head:
+            return
+        # 노드 x를 리스트에서 분리해내기
+        x.prev.next, x.next.prev = x.next, x.prev
+        del x
         self.size -= 1
 
-
-def josephus(n, k):
+def joseephus(n, k):
     L = DoublyLinkedList()
     L.head.key = 1
     tail = L.head
@@ -53,18 +58,28 @@ def josephus(n, k):
     L.head.prev = tail
     current = L.head
 
-    while len(L) != 1:
+    while len(L) > 1:
         print('for')
-        for i in range(k-1):
+        for i in range(k - 1):
             print(i, current.key, current.next.key)
             current = current.next
         print('delete' + str(current.key))
         L.deleteNode(current)
         current = current.next
-
+    #
+    current = current.next
+    # print('delete' + str(current.key))
+    # L.deleteNode(current)
     print(current.key)
 
 
+def josephus(n, k):
+    if (n == 1):
+        return 1
+    else:
+        return (josephus(n - 1, k) + k - 1) % n + 1
+
+
 a, b = map(int, input().split())
-josephus(a, b)
+print(josephus(a, b))
 

@@ -1,60 +1,79 @@
 class Node:
-    def __init__(self, key=None, value=None):
-        self.key = key
-        self.value = value
-        self.prev = self
-        self.next = self
+    def __init__(self, data):
+        self.data = data
+        self.next = None
 
 
 class DoublyLinkedList:
     def __init__(self):
-        self.head = Node()
-        self.size = 0
+        self.head = None
 
-    def __len__(self):
-        return self.size
+    def append(self, data):
+        node = Node(data)
+        self.insert_at_end(node)
 
-    def insertAfter(self, a, key):
-        new_node = Node(key)
-        current = self.head
-        while current.key != a:
+    def get_node(self, index, start):
+        if self.head is None:
+            return None
+        current = start
+        for i in range(index):
             current = current.next
-        new_node.next = current.next
-        new_node.prev = current
-        self.head.next = new_node
-        self.head.prev = new_node
-        self.size += 1
+        return current
 
-    def pushBack(self, key):
-        tail = self.head
-        for i in range(len(self)):
-            tail = tail.next
-        self.insertAfter(tail.key, key)
+    def get_prev_node(self, ref_node):
+        if self.head is None:
+            return None
+        current = self.head
+        while current.next != ref_node:
+            current = current.next
+        return current
 
-    def deleteNode(self, x):
-        print('deletenode')
-        print(x.prev.key, x.key, x.next.key)
-        x.prev.next = x.next
-        x.next.prev = x.prev
-        self.size -= 1
+    def insert_after(self, ref_node, new_node):
+        new_node.next = ref_node.next
+        ref_node.next = new_node
+
+    def insert_before(self, ref_node, new_node):
+        prev_node = self.get_prev_node(ref_node)
+        self.insert_after(prev_node, new_node)
+
+    def insert_at_end(self, new_node):
+        if self.head is None:
+            self.head = new_node
+            new_node.next = new_node
+        else:
+            self.insert_before(self.head, new_node)
+
+    def remove(self, node):
+        if self.head.next == self.head:
+            self.head = None
+        else:
+            prev_node = self.get_prev_node(node)
+            prev_node.next = node.next
+            if self.head == node:
+                self.head = node.next
 
 
-def josephus(c, k):
-    L = DoublyLinkedList()
-    ls = []
-    tail = L.head
-    for i in range(1, c+1):
-        new_node = Node(i)
-        ls.append(i)
-        tail = tail.next
-    k -= 1 # pop automatically skips the dead guy
-    idx = k
-    while len(ls) > 1:
-        ls.pop(idx) # kill prisoner at idx
-        idx = (idx + k) % len(ls)
-    print(ls[0])
+def has_one_node(temp):
+    if temp.head.next == temp.head:
+        return True
+    else:
+        return False
 
 
-a, b = map(int, input().split())
-josephus(a, b)
+def ans(temp, k):
+    if temp.head is None:
+        return None
+    start = temp.head
+    while not has_one_node(temp):
+        to_remove = temp.get_node(k - 1, start)
+        start = to_remove.next
+        temp.remove(to_remove)
+    return temp.head.data
 
+
+L = DoublyLinkedList()
+n, k = map(int, input().split())
+for i in range(1, n + 1):
+    L.append(i)
+
+print(ans(L, k))
