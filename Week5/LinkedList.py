@@ -1,30 +1,21 @@
 class Node:
-    def __init__(self, key=None, value=None):
+    def __init__(self, key=None):
         self.key = key
-        self.value = value
         self.prev = self
         self.next = self
-
 
 class DoublyLinkedList:
     def __init__(self):
         self.head = Node()
-        self.size = 0
 
-    def __len__(self):
-        return self.size
-
-    def size(self):
-        return self.size
-
-    # cuts off nodes between 'node a' and 'node b', and add it behind 'node x'
-    def splice(self, a, b, x):
+    def splice(self, a, b, x):  # cut [a..b] after x
         if a == None or b == None or x == None:
             return
-        # slice [a..b]
+        # 1. [a..b] 구간을 잘라내기
         a.prev.next = b.next
         b.next.prev = a.prev
-        # insert [a..b] after x
+
+        # 2. [a..b]를 x 다음에 삽입하기
         x.next.prev = b
         b.next = x.next
         a.prev = x
@@ -38,75 +29,49 @@ class DoublyLinkedList:
 
     def insertAfter(self, a, key):
         new_node = Node(key)
-        current = self.head
-        while current.key != key:
-            current = current.next
-        new_node.next = current.next
-        new_node.prev = current.prev
-        current.next = new_node
-        self.size += 1
+        self.moveAfter(new_node, a)
 
     def insertBefore(self, a, key):
         new_node = Node(key)
-        current = self.head
-        while current.key != key:
-            current = current.next
-        new_node.next = current
-        new_node.prev = current.prev
-        current.prev = new_node
-        self.size += 1
+        self.moveBefore(new_node, a)
 
     def pushFront(self, key):
-        new_node = Node(key)
-        new_node.next = self.head
-        new_node.prev = self.head.prev
-        self.head = new_node
-        self.size += 1
+        self.insertAfter(self.head, key)
 
     def pushBack(self, key):
-        new_node = Node(key)
-        tail = self.head
-        if self.head.next is self.head:
-            self.pushFront(key)
-        else:
-            for i in range(len(self) - 1):
-                tail = tail.next
-            new_node.next = self.head
-            new_node.prev = tail
-            tail.next = new_node
-            self.size += 1
+        self.insertBefore(self.head, key)
 
     def deleteNode(self, x):  # delete x
         if x == None or x == self.head:
             return
         # 노드 x를 리스트에서 분리해내기
-        x.prev.next = x.next
-        x.next.prev = x.prev
-        self.size -= 1
+        x.prev.next, x.next.prev = x.next, x.prev
+        del x
 
     def popFront(self):
         if self.head.next == self.head:
             return None
         key = self.head.next.key
         self.deleteNode(self.head.next)
-        self.size -= 1
         return key
 
     def popBack(self):
-        if self.head.prev == self.head:
+        if self.head.next == self.head:
             return None
         key = self.head.prev.key
         self.deleteNode(self.head.prev)
-        self.size -= 1
         return key
 
-    def search(self, key):
-        current = self.head
-        while current.next != self.head:
-            current = current.next
-            if current.key == key:
-                return current
-        return None
+    def printList(self):
+        v = self.head.next
+        if self.head.next == self.head:
+            print("h")
+        else:
+            print("h ->", end=" ")
+            while v.key != self.head.key:
+                print(v.key, "->", end=" ")
+                v = v.next
+            print("h")
 
     def isEmpty(self):
         if self.head.next is self.head:
@@ -118,39 +83,24 @@ class DoublyLinkedList:
         if self.head.next is self.head:
             return None
         else:
-            return self.head
+            return self.head.next.key
 
     def last(self):
         if self.head.next is self.head:
             return None
         else:
-            return self.head.prev
-
-    def join(self, list):
-        temp = DoublyLinkedList()
-        temp.head.next = temp.head
-        temp.head.prev = temp.head
-        for i in range(list):
-            temp.pushBack(list[i])
-        self.splice(temp.head, temp.head.prev, self.head.prev)
-
-    def split(self, x):
-        temp = DoublyLinkedList()
-        temp.head.next = temp.head
-        temp.head.prev = temp.head
-        self.splice(self.x, self.head.prev, temp.head)
-
-    def printList(self):
-        v = self.head
-        if self.head.next == self.head:
-            print("h")
-        else:
-            print("h ->", end=" ")
-            for i in range(len(self)):
-                print(v.key, "->", end=" ")
+            v = self.head.next
+            while v.next.key != self.head.key:
                 v = v.next
-            print("h")
+            return v.key
 
+    def search(self, key):
+        current = self.head
+        while current.next != self.head:
+            current = current.next
+            if current.key == key:
+                return current
+        return None
 
 L = DoublyLinkedList()
 while True:

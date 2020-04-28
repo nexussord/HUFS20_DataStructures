@@ -4,22 +4,18 @@ class Node:
         self.prev = self
         self.next = self
 
-
 class DoublyLinkedList:
     def __init__(self):
         self.head = Node()
-        self.size = 0
 
-    def __len__(self):
-        return self.size
-
-    def splice(self, a, b, x):
+    def splice(self, a, b, x):  # cut [a..b] after x
         if a == None or b == None or x == None:
             return
-        # splice [a...b]
+        # 1. [a..b] 구간을 잘라내기
         a.prev.next = b.next
         b.next.prev = a.prev
-        # insert [a...b] after x
+
+        # 2. [a..b]를 x 다음에 삽입하기
         x.next.prev = b
         b.next = x.next
         a.prev = x
@@ -34,12 +30,10 @@ class DoublyLinkedList:
     def insertAfter(self, a, key):
         new_node = Node(key)
         self.moveAfter(new_node, a)
-        self.size += 1
 
-    def insertBefore(self, a, key): # 4 1
+    def insertBefore(self, a, key):
         new_node = Node(key)
         self.moveBefore(new_node, a)
-        self.size += 1
 
     def pushFront(self, key):
         self.insertAfter(self.head, key)
@@ -47,40 +41,37 @@ class DoublyLinkedList:
     def pushBack(self, key):
         self.insertBefore(self.head, key)
 
-    def deleteNode(self, x):
+    def deleteNode(self, x):  # delete x
         if x == None or x == self.head:
-            return None
-        x.prev.next = x.next
-        x.next.prev = x.prev
+            return
+        # 노드 x를 리스트에서 분리해내기
+        x.prev.next, x.next.prev = x.next, x.prev
         del x
-        self.size -= 1
 
     def popFront(self):
         if self.head.next == self.head:
             return None
         key = self.head.next.key
         self.deleteNode(self.head.next)
-        self.size -= 1
         return key
 
     def popBack(self):
-        if self.head.next.key == self.head.key:
+        if self.head.next == self.head:
             return None
-        tail = self.head
-        for i in range(len(self)):
-            tail = tail.next
-        key = tail.key
-        self.deleteNode(tail)
-        self.size -= 1
+        key = self.head.prev.key
+        self.deleteNode(self.head.prev)
         return key
 
-    def search(self, key):
-        current = self.head
-        while current.next != self.head:
-            current = current.next
-            if current.key == key:
-                return current
-        return None
+    def printList(self):
+        v = self.head.next
+        if self.head.next == self.head:
+            print("h")
+        else:
+            print("h ->", end=" ")
+            while v.key != self.head.key:
+                print(v.key, "->", end=" ")
+                v = v.next
+            print("h")
 
     def isEmpty(self):
         if self.head.next is self.head:
@@ -92,39 +83,24 @@ class DoublyLinkedList:
         if self.head.next is self.head:
             return None
         else:
-            return self.head
+            return self.head.next
 
     def last(self):
         if self.head.next is self.head:
             return None
         else:
-            return self.head.prev
-
-    def join(self, list):
-        temp = DoublyLinkedList()
-        temp.head.next = temp.head
-        temp.head.prev = temp.head
-        for i in range(list):
-            temp.pushBack(list[i])
-        self.splice(temp.head, temp.head.prev, self.head.prev)
-
-    def split(self, x):
-        temp = DoublyLinkedList()
-        temp.head.next = temp.head
-        temp.head.prev = temp.head
-        self.splice(self.x, self.head.prev, temp.head)
-
-    def printList(self):
-        v = self.head.next
-        if self.head.next == self.head:
-            print("h")
-        else:
-            print("h ->", end=" ")
-            for i in range(len(self)):
-                print(v.key, "->", end=" ")
+            v = self.head.next
+            while v.next.key != self.head.key:
                 v = v.next
-            print("h")
+            return v.key
 
+    def search(self, key):
+        current = self.head
+        while current.next != self.head:
+            current = current.next
+            if current.key == key:
+                return current
+        return None
 
 L = DoublyLinkedList()
 while True:
@@ -182,5 +158,3 @@ while True:
         break
     else:
         print("* not allowed command. enter a proper command!")
-
-
